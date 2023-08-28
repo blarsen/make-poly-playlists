@@ -1,0 +1,6 @@
+#!/bin/bash
+
+BAND=$1
+ALBUM=$2
+
+find  MUSIC/$BAND/$ALBUM | grep -i -E '\.(flac|mp3)$' | sort | awk -v ORS='\r\n' 1 - >"$BAND - $ALBUM.m3u"
