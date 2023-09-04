@@ -82,7 +82,7 @@ find "$MUSICDIR" | \
     grep -i -E '\.(flac|mp3)$' | \
     sort | \
     awk -v ORS='\r\n' 1 - | \
-    sed 's|^[^/]*/||' >"$TMPMUSIC"
+    sed 's|^'"$MUSICDIR"'/||' >"$TMPMUSIC"
 
 COUNT=$(cat "$TMPMUSIC" | wc -l)
 progress "Found $COUNT music files in $MUSICDIR"
