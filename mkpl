@@ -2,6 +2,8 @@
 
 usage() {
     cat <<EOD
+Create M3U playlists for music found in a directory hierarchy
+
 Usage:
     mkpl [options] [MUSICDIR]
 
@@ -16,7 +18,8 @@ Usage:
             Verbose - give messages as the script runs
         -o
             Output directory - write playlists here. By default the playlists are
-            written i MUSICDIR
+            written to MUSICDIR. Note that even if you change the output directory
+            the playlists will be generated relative to MUSICDIR.
 
 EOD
 }
