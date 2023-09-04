@@ -1,2 +1,5 @@
-# make-poly-playlists
-Work in progress. Some of this stuff might work. I plan to tidy stuff up.
+# mkpl - Create playlists suitable for the Chord Poly music streamer
+
+The `mkpl` script creates playlists suitable for the Chord Poly music.
+
+Usage and options are found within the script itself.
