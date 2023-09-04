@@ -1,5 +1,0 @@
-#!/bin/bash
-
-ARTIST=$1
-
-find  MUSIC/"$ARTIST" -type f | grep -i -E '\.(flac|mp3)$' | sort | awk -v ORS='\r\n' 1 - >"$ARTIST.m3u"

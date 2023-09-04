@@ -1,6 +1,101 @@
 #!/bin/bash
 
-BAND=$1
-ALBUM=$2
+usage() {
+    cat <<EOD
+Usage:
+    mkpl [options] [MUSICDIR]
 
-find  MUSIC/$BAND/$ALBUM | grep -i -E '\.(flac|mp3)$' | sort | awk -v ORS='\r\n' 1 - >"$BAND - $ALBUM.m3u"
+    MUSICDIR is the directory that is searched for music and by default the place where
+    the playlists are written. If MUSICDIR isn't specified the current working directory
+    is used.
+
+    Options:
+        -h
+            Display this message and terminate
+        -v 
+            Verbose - give messages as the script runs
+        -o
+            Output directory - write playlists here. By default the playlists are
+            written i MUSICDIR
+
+EOD
+}
+
+progress() {
+    if [ "$VERBOSE" = "1" ]; then
+        echo $1
+    fi
+}
+
+# Default settings
+VERBOSE=0
+TMPDIR=/tmp
+
+TEMP=$(getopt -o 'hvo:' -- "$@")
+
+if [ $? -ne 0 ]; then
+        usage
+        exit 1
+fi
+
+eval set -- "$TEMP"
+unset TEMP
+
+while true; do
+    case "$1" in
+        '-h')
+            usage
+            exit
+        ;;
+        '-v')
+            VERBOSE=1
+            shift
+            continue
+        ;;
+        '-o')
+            PLDIR=$2
+            shift 2
+            continue
+        ;;
+        '--')
+            shift
+            break
+        ;;
+    esac
+done
+
+MUSICDIR=$1
+
+if [ -z "$MUSICDIR" ]; then
+  MUSICDIR=.
+fi
+
+if [ -z "$PLDIR" ]; then
+  PLDIR=$MUSICDIR
+fi
+
+progress "Scanning $1 for music"
+
+TMPMUSIC=$(mktemp "$TMPDIR"/tmp-mkpl.music.XXXXXXXX)
+
+find "$MUSICDIR" | \
+    grep -i -E '\.(flac|mp3)$' | \
+    sort | \
+    awk -v ORS='\r\n' 1 - | \
+    sed 's|^[^/]*/||' >"$TMPMUSIC"
+
+COUNT=$(cat "$TMPMUSIC" | wc -l)
+progress "Found $COUNT music files in $MUSICDIR"
+
+TMPDIRS=$(mktemp "$TMPDIR"/tmp-mkpl.dirs.XXXXXXXX)
+cat "$TMPMUSIC" | sed 's|/[^/]*$||' | sort | uniq >"$TMPDIRS"
+
+COUNT=$(cat "$TMPDIRS" | wc -l)
+progress "Found $COUNT directories containing music"
+
+cat "$TMPDIRS" | while read DIR 
+do
+    PLAYLIST="$PLDIR/"$(echo "$DIR" | sed 's|/|-|g').m3u
+    grep "$DIR" "$TMPMUSIC" > "$PLAYLIST"
+    progress "Created playlist $PLAYLIST containing $(cat "$PLAYLIST"|wc -l) tracks"
+done
