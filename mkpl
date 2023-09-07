@@ -2,7 +2,7 @@
 
 usage() {
     cat <<EOD
-    
+
 Create M3U playlists for music found in a directory hierarchy
 
 Usage:
@@ -21,6 +21,11 @@ Usage:
             Output directory - write playlists here. By default the playlists are
             written to MUSICDIR. Note that even if you change the output directory
             the entries in the playlists will be generated relative to MUSICDIR.
+        -p
+            Chord Poly disk handling. This includes deleting the Poly database files from
+            the MUSICDIR if present. This will force the Poly to rebuild its database once the
+            Poly is restarted with the TF card mounted. Not doing this will likely disable all
+            playlists on the card.
 
 EOD
 }
@@ -31,11 +36,16 @@ progress() {
     fi
 }
 
-# Default settings
+# Default settings changeable by options
 VERBOSE=0
-TMPDIR=/tmp
+POLYDISK=0
+ZAPOLDPL=0
 
-TEMP=$(getopt -o 'hvo:' -- "$@")
+# Settings
+TMPDIR=/tmp
+declare -a POLYDBFILES=("art-cache-a.tar.gz" "dlna-sdfree.dat" "mpd.db")
+
+TEMP=$(getopt -o 'hvo:pz' -- "$@")
 
 if [ $? -ne 0 ]; then
         usage
@@ -56,9 +66,19 @@ while true; do
             shift
             continue
         ;;
+        '-p')
+            POLYDISK=1
+            shift
+            continue
+        ;;
         '-o')
             PLDIR=$2
             shift 2
+            continue
+        ;;
+        '-z')
+            ZAPOLDPL=1
+            shift 
             continue
         ;;
         '--')
@@ -77,6 +97,25 @@ fi
 if [ -z "$PLDIR" ]; then
   PLDIR="$MUSICDIR"
 fi
+
+if [ "$POLYDISK" = "1" ]; then
+    progress "Deleting Chord Poly database files from $MUSICDIR"
+    for DBFILE in "${POLYDBFILES[@]}"
+    do
+        if [ -f "$MUSICDIR/$DBFILE" ]; then
+            rm -f "$MUSICDIR/$DBFILE"
+        else
+            progress "Database file $MUSICDIR/$DBFILE didn't exist, ignoring"
+        fi
+    done
+    rm -f $POLYDBFILES
+fi
+
+if [ "$ZAPOLDPL" = "1" ]; then
+    progress "Deleting existing playlists before creating new ones"
+    rm -f *.m3u
+fi
+
 
 progress "Scanning $1 for music"
 

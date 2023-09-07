@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Unmount specified USB drive on WSL2
+#
+
+DRIVE=$1
+
+if [ -z "$DRIVE" ]; then
+    echo "Usage: sh wsl-umount-usb DRIVELETTER"
+    exit 1
+fi
+
+echo "This might take a few seconds"
+sudo umount /mnt/$DRIVE
+while :
+do
+    mount | grep /mnt/$DRIVE
+    R=$?
+    if [ $R = "1" ]; then
+        echo "/mnt/$DRIVE has been unmounted"
+        exit 0
+    fi
+    echo "/mnt/$DRIVE still mounted, retrying"
+    sleep 1
+    sudo umount /mnt/$DRIVE
+done

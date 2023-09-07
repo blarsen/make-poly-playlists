@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Mount specified USB drive on WSL2
+#
+
+DRIVE=$1
+
+if [ -z "$DRIVE" ]; then
+    echo "Usage: sh wsl-mount-usb DRIVELETTER"
+    exit 1
+fi
+
+sudo mkdir -p /mnt/$DRIVE
+sudo mount -t drvfs $DRIVE: /mnt/$DRIVE -o uid=$(id -u $USER),gid=$(id -g $USER),metadata
