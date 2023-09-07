@@ -26,6 +26,9 @@ Usage:
             the MUSICDIR if present. This will force the Poly to rebuild its database once the
             Poly is restarted with the TF card mounted. Not doing this will likely disable all
             playlists on the card.
+        -z
+            Zap existing playlists before creating new ones. Useful if you have removed any 
+            music on the card or rearranged the directory structure.
 
 EOD
 }
